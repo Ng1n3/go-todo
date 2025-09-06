@@ -7,6 +7,6 @@ import (
 )
 
 func main() {
-	fmt.Println("Welcome to GO TODO app")
-	menu.Menu()
+	fmt.Printf("\nWelcome to GO TODO app\n")
+	menu.MainMenu()
 }

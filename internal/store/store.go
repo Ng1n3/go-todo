@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/Ng1n3/go-todo/internal/types"
@@ -50,6 +51,28 @@ func (ts *TodoStorage) Save(todo types.Todo) {
 	ts.store[todo.ID] = todo
 }
 
+func (ts *TodoStorage) SaveSummary(file string) {
+	titles := make([]string, 0, len(ts.store)) // title arrays
+	for _, todo := range ts.store {
+		titles = append(titles, strings.TrimSpace(todo.Title))
+	}
+
+	summary := map[string][]string{
+		ts.file: titles,
+	}
+
+	data, err := json.MarshalIndent(summary, "", " ")
+	if err != nil {
+		fmt.Printf("\nan error occured while marshalling: %v\n", err)
+	}
+
+	err = os.WriteFile(file, data, 0644)
+	if err != nil {
+		fmt.Printf("\nthere was an error writting to your json file: %v\n", err)
+	}
+
+}
+
 func (ts *TodoStorage) Get(id string) (types.Todo, bool) {
 	todo, ok := ts.store[id]
 	return todo, ok
@@ -73,7 +96,25 @@ func (ts *TodoStorage) List() []types.Todo {
 	return todos
 }
 
-func create(title, body string) (types.Todo, error) {
+func FileExists(summaryFile, filename string) bool {
+	data, err := os.ReadFile(summaryFile)
+	if err != nil {
+		fmt.Printf("\nthere was an error reading your summary file: %v\n", err)
+		return false
+	}
+
+	var summary map[string][]string
+	if err := json.Unmarshal(data, &summary); err != nil {
+		fmt.Printf("\nthere was an error unmarshaling: %v\n", err)
+		return false
+	}
+
+	_, exists := summary[filename]
+	return exists
+
+}
+
+func Create(title, body string) (types.Todo, error) {
 	if len(title) < 3 {
 		return types.Todo{}, fmt.Errorf("length of title must be above 4")
 	} else if len(body) < 2 {
