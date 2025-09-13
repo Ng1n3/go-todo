@@ -52,13 +52,13 @@ func (ts *TodoStorage) Save(todo types.Todo) {
 }
 
 func (ts *TodoStorage) SaveSummary(file string) {
-	titles := make([]string, 0, len(ts.store)) // title arrays
+	tasks := make([]string, 0, len(ts.store)) // title arrays
 	for _, todo := range ts.store {
-		titles = append(titles, strings.TrimSpace(todo.Title))
+		tasks = append(tasks, strings.TrimSpace(todo.Task))
 	}
 
 	summary := map[string][]string{
-		ts.file: titles,
+		ts.file: tasks,
 	}
 
 	data, err := json.MarshalIndent(summary, "", " ")
@@ -97,6 +97,19 @@ func (ts *TodoStorage) List() []types.Todo {
 }
 
 func FileExists(summaryFile, filename string) bool {
+	if _, err := os.Stat(summaryFile); os.IsNotExist(err) {
+		emptySummary := make(map[string][]string)
+
+		data, _ := json.MarshalIndent(emptySummary, "", " ")
+
+		if err := os.WriteFile(summaryFile, data, 0644); err != nil {
+			fmt.Printf("\nfailed to create summary file: %v\n", err)
+			return false
+		}
+
+		fmt.Printf("\nCreated a new summary file: %s\n", summaryFile)
+	}
+
 	data, err := os.ReadFile(summaryFile)
 	if err != nil {
 		fmt.Printf("\nthere was an error reading your summary file: %v\n", err)
@@ -108,22 +121,29 @@ func FileExists(summaryFile, filename string) bool {
 		fmt.Printf("\nthere was an error unmarshaling: %v\n", err)
 		return false
 	}
-
 	_, exists := summary[filename]
 	return exists
 
 }
 
-func Create(title, body string) (types.Todo, error) {
-	if len(title) < 3 {
-		return types.Todo{}, fmt.Errorf("length of title must be above 4")
-	} else if len(body) < 2 {
-		return types.Todo{}, fmt.Errorf("length of body must be above 4")
+func Create(task, dueDate string, priority types.Priority) (types.Todo, error) {
+	if len(task) < 2 {
+		return types.Todo{}, fmt.Errorf("length of task must be above 2 characters")
+	} else if priority == "" {
+		priority = types.Low
+	}
+
+	dueDate = strings.TrimSpace(dueDate)
+
+	parsedDate, err := time.Parse("2006-01-02", dueDate)
+	if err != nil {
+		return types.Todo{}, fmt.Errorf("invalid error format, it should be like (2022-12-06: %v)", err)
 	}
 	return types.Todo{
 		ID:        generateID(6),
-		Title:     title,
-		Body:      body,
+		Task:      task,
+		DueDate:   parsedDate,
+		Priority:  priority,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}, nil

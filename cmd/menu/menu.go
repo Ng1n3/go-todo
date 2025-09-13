@@ -9,6 +9,8 @@ import (
 	"strings"
 
 	"github.com/Ng1n3/go-todo/internal/store"
+	"github.com/Ng1n3/go-todo/internal/types"
+	"github.com/olekukonko/tablewriter"
 )
 
 var ts *store.TodoStorage
@@ -56,7 +58,6 @@ func CreateTodoFile() {
 		return
 	}
 	ts = store.NewTodoStorage(storageName)
-
 	Menu()
 }
 
@@ -75,6 +76,8 @@ func Menu() {
 		switch choice {
 		case "1":
 			CreateTodo()
+		case "2":
+			ListTodo()
 		case "5":
 			return
 		default:
@@ -97,21 +100,41 @@ func normalizeJSONFilename(input string) (string, error) {
 	return name + ".json", nil
 }
 
+func toPriority(p string) types.Priority {
+	switch p {
+	case "low":
+		return types.Low
+	case "medium":
+		return types.Medium
+	case "high":
+		return types.High
+	default:
+		return types.Low
+	}
+}
+
 func CreateTodo() {
 	reader := bufio.NewReader(os.Stdin)
 
-	fmt.Printf("Give your Todo a title \n")
-	title, err := reader.ReadString('\n')
+	fmt.Printf("what tasks do you want to perform? \n")
+	task, err := reader.ReadString('\n')
 	if err != nil {
-		fmt.Printf("\nthere was an error reading the string: %v\n", err)
+		fmt.Printf("\nthere was an error reading your tasks: %v\n", err)
 	}
 
-	fmt.Printf("What is your todo about? \n")
-	body, err := reader.ReadString('\n')
+	fmt.Printf("How important is this task, choose one between  HIGH, MEDIUM, LOW, choose one? \n")
+	priority, err := reader.ReadString('\n')
 	if err != nil {
-		fmt.Printf("\nthere was an error reading the string: %v\n", err)
+		fmt.Printf("\nthere was an error reading your priority: %v\n", err)
 	}
-	todo, err := store.Create(title, body)
+
+	fmt.Printf("When is this task due, use format (2022-06-12)\n")
+	dueDate, err := reader.ReadString('\n')
+	if err != nil {
+		fmt.Printf("\nthere was an error reading your due date: %v\n", err)
+	}
+
+	todo, err := store.Create(task, dueDate, toPriority(priority))
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -124,5 +147,26 @@ func CreateTodo() {
 
 func ListTodo() {
 	todos := ts.List()
-	fmt.Printf("List of Todos: %v", todos)
+
+	if len(todos) == 0 {
+		fmt.Println("\nNo todos found.")
+		return
+	}
+
+	table := tablewriter.NewWriter(os.Stdout)
+	table.Header([]string{"ID", "Task", "Due Date", "Priority", "Created At", "Updated At"})
+
+	for _, todo := range todos {
+		table.Append([]string{
+			todo.ID,
+			todo.Task,
+			todo.DueDate.Format("2006-01-02"),
+			string(todo.Priority),
+			todo.CreatedAt.Format("2006-01-02 15:04"),
+			todo.UpdatedAt.Format("2006-01-02 15:04"),
+		})
+	}
+
+	table.Render()
+	// fmt.Printf("List of Todos: %v", todos)
 }
