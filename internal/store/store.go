@@ -126,7 +126,7 @@ func FileExists(summaryFile, filename string) bool {
 
 }
 
-func Create(task, dueDate string, priority types.Priority) (types.Todo, error) {
+func Create(task, dueDate string, priority types.Priority, labels []string) (types.Todo, error) {
 	if len(task) < 2 {
 		return types.Todo{}, fmt.Errorf("length of task must be above 2 characters")
 	} else if priority == "" {
@@ -139,11 +139,14 @@ func Create(task, dueDate string, priority types.Priority) (types.Todo, error) {
 	if err != nil {
 		return types.Todo{}, fmt.Errorf("invalid error format, it should be like (2022-12-06: %v)", err)
 	}
+
 	return types.Todo{
 		ID:        generateID(6),
 		Task:      task,
 		DueDate:   parsedDate,
 		Priority:  priority,
+		Labels:    labels,
+		Completed: false,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}, nil

@@ -29,6 +29,8 @@ func MainMenu() {
 		switch choice {
 		case "1":
 			CreateTodoFile()
+		case "2":
+			LoadTodo()
 		case "4":
 			fmt.Println("Bye. Hope to see you soon!")
 			return
@@ -101,6 +103,7 @@ func normalizeJSONFilename(input string) (string, error) {
 }
 
 func toPriority(p string) types.Priority {
+	p = strings.ToLower(p)
 	switch p {
 	case "low":
 		return types.Low
@@ -128,13 +131,25 @@ func CreateTodo() {
 		fmt.Printf("\nthere was an error reading your priority: %v\n", err)
 	}
 
+	priority = strings.TrimSpace(priority)
+	priority = strings.ToUpper(priority)
+
 	fmt.Printf("When is this task due, use format (2022-06-12)\n")
 	dueDate, err := reader.ReadString('\n')
 	if err != nil {
 		fmt.Printf("\nthere was an error reading your due date: %v\n", err)
 	}
 
-	todo, err := store.Create(task, dueDate, toPriority(priority))
+	fmt.Printf("What labels would you give this todo \n")
+	labelsInput, err := reader.ReadString('\n')
+	if err != nil {
+		fmt.Printf("\nthere was an error reading your labels: %v\n", err)
+	}
+
+	labelsInput = strings.TrimSpace(labelsInput)
+	labels := strings.Split(labelsInput, ",")
+
+	todo, err := store.Create(task, dueDate, toPriority(priority), labels)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -154,14 +169,22 @@ func ListTodo() {
 	}
 
 	table := tablewriter.NewWriter(os.Stdout)
-	table.Header([]string{"ID", "Task", "Due Date", "Priority", "Created At", "Updated At"})
+	table.Header([]string{"ID", "Task", "Due Date", "Priority", "Completed", "Labels", "Created At", "Updated At"})
 
 	for _, todo := range todos {
+		labels := strings.Join(todo.Labels, ", ")
+		completed := "No"
+		if todo.Completed {
+			completed = "Yes"
+		}
+
 		table.Append([]string{
 			todo.ID,
 			todo.Task,
 			todo.DueDate.Format("2006-01-02"),
 			string(todo.Priority),
+			completed,
+			labels,
 			todo.CreatedAt.Format("2006-01-02 15:04"),
 			todo.UpdatedAt.Format("2006-01-02 15:04"),
 		})
@@ -169,4 +192,25 @@ func ListTodo() {
 
 	table.Render()
 	// fmt.Printf("List of Todos: %v", todos)
+}
+
+func LoadTodo() {
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Printf("\nEnter the name of the todo file you want to load \n")
+	filename, err := reader.ReadString('\n')
+	if err != nil {
+		fmt.Printf("\nthere was an error reading the name the filename: %v\n", err)
+	}
+
+	filename = strings.TrimSpace(filename)
+
+	if _, err := os.Stat(filename); err != nil {
+		fmt.Printf("\nthere was an error searching for the file you need: %v\n", err)
+		return
+	}
+
+	ts = store.NewTodoStorage(filename)
+	fmt.Printf("\nTodo file '%s' loaded successfully!\n", filename)
+
+	Menu()
 }
