@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -97,6 +98,13 @@ func (ts *TodoStorage) List() []types.Todo {
 }
 
 func FileExists(summaryFile, filename string) bool {
+	storageDir := "storage"
+	if _, err := os.Stat(storageDir); os.IsNotExist(err) {
+		if err := os.Mkdir(storageDir, 0755); err != nil {
+			fmt.Printf("\nfailed to create storage directory: %v\n", err)
+		}
+	}
+
 	if _, err := os.Stat(summaryFile); os.IsNotExist(err) {
 		emptySummary := make(map[string][]string)
 
@@ -121,7 +129,9 @@ func FileExists(summaryFile, filename string) bool {
 		fmt.Printf("\nthere was an error unmarshaling: %v\n", err)
 		return false
 	}
-	_, exists := summary[filename]
+
+	todoPath := filepath.Join(storageDir, filename)
+	_, exists := summary[todoPath]
 	return exists
 
 }

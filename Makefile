@@ -30,3 +30,5 @@ confirm: build
 clean: confirm
 	@echo -n "Cleaning up..."
 	@rm -rf ${build_dir}
+	@echo -n "Removing storage and json files..."
+	@rm -rf storage save_todos.json

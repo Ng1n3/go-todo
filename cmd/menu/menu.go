@@ -19,7 +19,7 @@ func MainMenu() {
 	reader := bufio.NewReader(os.Stdin)
 
 	for {
-		fmt.Printf("1.) Create a new Todo file\n2.) Load from my todo files\n3.) List todo files\n4.) Exit app\n")
+		fmt.Printf("1.) Create a new Todo file\n2.) Load from my todo files\n3.) List todo files\n4.) Delete todo files\n5.) Exit app \n")
 		choice, err := reader.ReadString('\n')
 		if err != nil {
 			fmt.Printf("\nThere was an error reading a name for your file: %v\n", err)
@@ -31,7 +31,9 @@ func MainMenu() {
 			CreateTodoFile()
 		case "2":
 			LoadTodo()
-		case "4":
+		case "3":
+			ListTodoFiles()
+		case "5":
 			fmt.Println("Bye. Hope to see you soon!")
 			return
 		default:
@@ -59,8 +61,48 @@ func CreateTodoFile() {
 		fmt.Printf("Please find another name for your new todo, as %s has already being created by you.\n", storageName)
 		return
 	}
-	ts = store.NewTodoStorage(storageName)
+
+	storageDir := "storage"
+	fullPath := filepath.Join(storageDir, storageName)
+
+	ts = store.NewTodoStorage(fullPath)
 	Menu()
+}
+
+func ListTodoFiles() {
+	storageDir := "storage"
+
+	if _, err := os.Stat(storageDir); os.IsNotExist(err) {
+		fmt.Printf("\nno storage directory found. Create some todos first: %v\n", err)
+		return
+	}
+
+	files, err := os.ReadDir(storageDir)
+	if err != nil {
+		fmt.Printf("error reading storage directory: %v\n", err)
+		return
+	}
+
+	table := tablewriter.NewWriter(os.Stdout)
+	table.Header([]string{"File Name", "Size (KB)", "Created At", "Updated At"})
+
+	for _, file := range files {
+		if !file.IsDir() {
+			filepath := filepath.Join(storageDir, file.Name())
+			info, err := os.Stat(filepath)
+			if err != nil {
+				fmt.Printf("\nerror getting file info for %s: %v\n", file.Name(), err)
+				continue
+			}
+			table.Append([]string{
+				file.Name(),
+				fmt.Sprintf("%.2f", float64(info.Size())/1024.0),
+				info.ModTime().Format("2006-01-02 15.04"),
+				info.ModTime().Format("2006-01-02 15:04"),
+			})
+		}
+	}
+	table.Render()
 }
 
 func Menu() {
