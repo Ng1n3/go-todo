@@ -364,7 +364,7 @@ func LoadTodo() {
 		fmt.Printf("\nthere was an error reading the name the filename: %v\n", err)
 	}
 
-	filename = strings.TrimSpace(filename)
+	filename = "storage/" + strings.TrimSpace(filename)
 
 	if _, err := os.Stat(filename); err != nil {
 		fmt.Printf("\nthere was an error searching for the file you need: %v\n", err)
