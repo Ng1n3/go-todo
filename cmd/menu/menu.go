@@ -281,6 +281,7 @@ func UpdateTodo() {
 	choice = strings.TrimSpace(choice)
 	switch choice {
 	case "1":
+		fmt.Printf("\nEnter a new Task title:  \n")
 		newTitle, err := reader.ReadString('\n')
 		if err != nil {
 			fmt.Printf("\nthere was an error reading your title for the update: %v\n", err)
@@ -288,6 +289,7 @@ func UpdateTodo() {
 		}
 		selectedTodo.Task = newTitle
 	case "2":
+		fmt.Printf("\nEnter a new due Date: \n")
 		dueDateStr, err := reader.ReadString('\n')
 		if err != nil {
 			fmt.Printf("\nthere was an error reading your due date for the update: %v\n", err)
@@ -304,6 +306,7 @@ func UpdateTodo() {
 		selectedTodo.DueDate = dueDate
 
 	case "3":
+		fmt.Printf("\nEnter the new priority: \n")
 		priority, err := reader.ReadString('\n')
 		if err != nil {
 			fmt.Printf("\nthere was an error reading your priority for the update: %v\n", err)
@@ -314,6 +317,7 @@ func UpdateTodo() {
 
 		selectedTodo.Priority = toPriority(priority)
 	case "4":
+		fmt.Printf("\nEnter new lables: \n")
 		labelsInput, err := reader.ReadString('\n')
 		if err != nil {
 			fmt.Printf("\nthere was an error reading your priority for the update: %v\n", err)
@@ -324,6 +328,7 @@ func UpdateTodo() {
 		labels := strings.Split(labelsInput, ",")
 		selectedTodo.Labels = labels
 	case "5":
+		fmt.Printf("\nEnter a completed status: \n")
 		completedStr, err := reader.ReadString('\n')
 		if err != nil {
 			fmt.Printf("\nthere was an error reading your priority for the update: %v\n", err)
