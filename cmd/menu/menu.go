@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/Ng1n3/go-todo/internal/store"
 	"github.com/Ng1n3/go-todo/internal/types"
@@ -122,6 +124,8 @@ func Menu() {
 			CreateTodo()
 		case "2":
 			ListTodo()
+		case "3":
+			UpdateTodo()
 		case "5":
 			return
 		default:
@@ -234,6 +238,115 @@ func ListTodo() {
 
 	table.Render()
 	// fmt.Printf("List of Todos: %v", todos)
+}
+
+func UpdateTodo() {
+
+	todos := ts.List()
+	reader := bufio.NewReader(os.Stdin)
+
+	// show the list of todos with their IDs
+	ListTodo()
+
+	// As the user for the ID of the todo to update
+	fmt.Printf("\n Enter the Todo ID you would like to update from.\n")
+	userId, err := reader.ReadString('\n')
+	if err != nil {
+		fmt.Printf("\nthere was an error reading userId for updating: %v\n", err)
+		return
+	}
+
+	userId = strings.TrimSpace(userId)
+
+	// Find the todo with the given id
+	var selectedTodo *types.Todo
+
+	for _, todo := range todos {
+		if todo.ID == userId {
+			selectedTodo = &todo
+		}
+	}
+
+	if selectedTodo == nil {
+		fmt.Printf("Todo with id '%s' not found", userId)
+		return
+	}
+
+	fmt.Printf("\nWhat field would you like to update \n1.) Title \n2.) Due Date \n3.) Priority \n4.) Labels \n5.) Completed Status \n")
+	choice, err := reader.ReadString('\n')
+	if err != nil {
+		fmt.Printf("\nthere was an error reading options for updating: %v\n", err)
+		return
+	}
+	choice = strings.TrimSpace(choice)
+	switch choice {
+	case "1":
+		newTitle, err := reader.ReadString('\n')
+		if err != nil {
+			fmt.Printf("\nthere was an error reading your title for the update: %v\n", err)
+			return
+		}
+		selectedTodo.Task = newTitle
+	case "2":
+		dueDateStr, err := reader.ReadString('\n')
+		if err != nil {
+			fmt.Printf("\nthere was an error reading your due date for the update: %v\n", err)
+			return
+		}
+		dueDateStr = strings.TrimSpace(dueDateStr)
+
+		dueDate, err := time.Parse("2006-01-02", dueDateStr)
+		if err != nil {
+			fmt.Printf("\ninvalid date format. Please use YYYY-MM-DD\n")
+			return
+		}
+
+		selectedTodo.DueDate = dueDate
+
+	case "3":
+		priority, err := reader.ReadString('\n')
+		if err != nil {
+			fmt.Printf("\nthere was an error reading your priority for the update: %v\n", err)
+			return
+		}
+		priority = strings.TrimSpace(priority)
+		priority = strings.ToUpper(priority)
+
+		selectedTodo.Priority = toPriority(priority)
+	case "4":
+		labelsInput, err := reader.ReadString('\n')
+		if err != nil {
+			fmt.Printf("\nthere was an error reading your priority for the update: %v\n", err)
+			return
+		}
+
+		labelsInput = strings.TrimSpace(labelsInput)
+		labels := strings.Split(labelsInput, ",")
+		selectedTodo.Labels = labels
+	case "5":
+		completedStr, err := reader.ReadString('\n')
+		if err != nil {
+			fmt.Printf("\nthere was an error reading your priority for the update: %v\n", err)
+			return
+		}
+		completedStr = strings.TrimSpace(completedStr)
+
+		completed, err := strconv.ParseBool(completedStr)
+		if err != nil {
+			fmt.Printf("\nthere was an error converting string to boolean: %v\n", err)
+			return
+		}
+		selectedTodo.Completed = completed
+	default:
+		fmt.Printf("\nSorry this command is invalid\n")
+		return
+	}
+
+	ts.Save(*selectedTodo)
+	ts.Persist()
+	ts.SaveSummary("save_todos.json")
+
+	fmt.Println("Todo updated successfully")
 }
 
 func LoadTodo() {

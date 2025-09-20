@@ -1,2 +1,3 @@
 bin/*
 save_todos.json
+storage/*
