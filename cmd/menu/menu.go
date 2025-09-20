@@ -342,6 +342,8 @@ func UpdateTodo() {
 		return
 	}
 
+	selectedTodo.UpdatedAt = time.Now()
+
 	ts.Save(*selectedTodo)
 	ts.Persist()
 	ts.SaveSummary("save_todos.json")
