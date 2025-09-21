@@ -35,6 +35,8 @@ func MainMenu() {
 			LoadTodo()
 		case "3":
 			ListTodoFiles()
+		case "4":
+			DeleteTodoFile()
 		case "5":
 			fmt.Println("Bye. Hope to see you soon!")
 			return
@@ -105,6 +107,29 @@ func ListTodoFiles() {
 		}
 	}
 	table.Render()
+}
+
+func DeleteTodoFile() {
+	storageDir := "storage/"
+
+	reader := bufio.NewReader(os.Stdin)
+	ListTodoFiles()
+
+	fmt.Printf("\nEnter the name of the name of the file you want to delete\n")
+	filename, err := reader.ReadString('\n')
+	if err != nil {
+		fmt.Printf("\nthere was an error reading your filename: %v\n", err)
+		return
+	}
+
+	filename = storageDir + strings.TrimSpace(filename)
+	err = os.Remove(filename)
+	if err != nil {
+		fmt.Printf("\nThere was an error deleting the file: %v\n", err)
+		return
+	}
+
+	fmt.Printf("\nFile '%v'  was successfully deleted!\n", filename)
 }
 
 func Menu() {
