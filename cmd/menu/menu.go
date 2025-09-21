@@ -126,6 +126,8 @@ func Menu() {
 			ListTodo()
 		case "3":
 			UpdateTodo()
+		case "4":
+			DeleteTodo()
 		case "5":
 			return
 		default:
@@ -354,6 +356,59 @@ func UpdateTodo() {
 	ts.SaveSummary("save_todos.json")
 
 	fmt.Println("Todo updated successfully")
+}
+
+func DeleteTodo() {
+	todos := ts.List()
+
+	ListTodo()
+
+	reader := bufio.NewReader(os.Stdin)
+
+	fmt.Printf("\n Enter the id of the todo you want to delete: \n")
+	todoID, err := reader.ReadString('\n')
+	if err != nil {
+		fmt.Printf("\nthere was an error reading the todo id: %v\n", err)
+		return
+	}
+
+	todoID = strings.TrimSpace(todoID)
+
+	var selectedTodo *types.Todo
+
+	for _, todo := range todos {
+		if todo.ID == todoID {
+			selectedTodo = &todo
+		}
+	}
+
+	if selectedTodo == nil {
+		fmt.Printf("\n selected todo with id '%v' not found! \n", todoID)
+		return
+	}
+
+	fmt.Printf("\nAre you sure you want to delete this todo with task: %v\n1.) Yes \n2.) No\n", selectedTodo.Task)
+	deletedChoice, err := reader.ReadString('\n')
+	if err != nil {
+		fmt.Printf("\nthere was an error reading your delete Choice: %v\n", err)
+	}
+
+	deletedChoice = strings.TrimSpace(deletedChoice)
+	switch deletedChoice {
+	case "1":
+		if ts.Delete(selectedTodo.ID) {
+			fmt.Printf("\nTodo successfully Deleted!\n")
+			ts.Persist()
+			ts.SaveSummary("save_todos.json")
+		} else {
+			fmt.Printf("\nFailed to delete todo!\n")
+		}
+	case "2":
+		fmt.Printf("\nDeletion cancelled.\n")
+	default:
+		fmt.Printf("\nInvalid choice.\n")
+	}
+
 }
 
 func LoadTodo() {
