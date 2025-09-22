@@ -48,3 +48,18 @@ func ValidateLabels(labelsInput string) []string {
 
   return cleanLabel
 }
+
+func ValidateCompleted(completedInput string) (bool,error) {
+  completedInput = strings.TrimSpace(strings.ToLower(completedInput))
+
+  switch completedInput {
+  case "yes", "y", "true", "1":
+    return true, nil
+  case "no", "n", "false", "0":
+    return false, nil
+  case "":
+    return false, nil
+  default:
+    return false, errors.ErrInvalidCompletedValue
+  }
+}

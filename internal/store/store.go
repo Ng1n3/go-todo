@@ -80,13 +80,13 @@ func (ts *TodoStorage) Persist()error {
   return nil
 }
 
-func (ts *TodoStorage) Save(todo types.Todo) error {
+func (ts *TodoStorage) Save(todo *types.Todo) error {
   if err := todo.Validate(); err != nil {
     return fmt.Errorf("invalid todo: %w",err)
   }
 
   todo.UpdatedAt = time.Now()
-	ts.store[todo.ID] = todo
+	ts.store[todo.ID] = *todo
   return nil
 }
 
@@ -139,6 +139,6 @@ func (ts *TodoStorage) List() []types.Todo {
 	return todos
 }
 
-func (ts *TodoStorage) count() int {
+func (ts *TodoStorage) Count() int {
   return len(ts.store)
 }

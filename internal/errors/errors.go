@@ -9,4 +9,5 @@ var (
 	ErrFileExists       = errors.New("file already exists")
 	ErrInvalidDateFormat = errors.New("invalid date format")
 	ErrTaskTooShort     = errors.New("task must be at least 2 characters long")
+  ErrInvalidCompletedValue = errors.New("invalid input")
 )
