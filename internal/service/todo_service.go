@@ -1,3 +1,13 @@
+// Package service provides the business logic layer for the go-todo application.
+// 
+// It acts as an intermediary between the CLI/UI layer and the storage layer.
+// The TodoService type exposes high-level operations for managing todos such as
+// creating, updating, deleting, and listing tasks. It validates input using the
+// utils package, interacts with the store package for persistence, and applies
+// application-level rules like default priorities and summary file generation.
+//
+// In short, service orchestrates todo management while keeping validation and
+// persistence concerns separated into their respective packages.
 package service
 
 import (
@@ -77,7 +87,7 @@ func (ts *TodoService) CreateTodo (task, dueDate, completed  string, priority ty
   
 }
 
-func (ts *TodoService) UpdateTodo (id string, updates map[string]interface{}) error {
+func (ts *TodoService) UpdateTodo (id string, updates map[string]any) error {
   todo, err := ts.storage.Get(id)
   if err != nil {
     return err
