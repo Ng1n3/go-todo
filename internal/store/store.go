@@ -138,3 +138,7 @@ func (ts *TodoStorage) List() []types.Todo {
 	}
 	return todos
 }
+
+func (ts *TodoStorage) count() int {
+  return len(ts.store)
+}
