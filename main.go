@@ -7,6 +7,11 @@ import (
 )
 
 func main() {
+  controller := menu.NewMenuController()
+  controller.Start()
+  if confirm == "y" || confirm == "yes" {
+    if err := os.Remove(fullPath)
+  }
 	fmt.Printf("\nWelcome to GO TODO app\n")
 	menu.MainMenu()
 }

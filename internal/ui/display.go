@@ -46,6 +46,31 @@ func (d *Display) ShowTodos(todos []types.Todo) {
   table.Render()
 }
 
+func (d *Display) ShowTodo (todo types.Todo) {
+  table := tablewriter.NewWriter(os.Stdout)
+  table.Header([]string{"ID", "Task", "Due Date", "Priority", "Completed", "Labels", "Created", "Updated"})
+
+    labels := strings.Join(todo.Labels, ", ")
+    completed := "No"
+    if todo.Completed {
+      completed = "Yes"
+    }
+    
+    table.Append([]string {
+      todo.ID,
+      todo.Task,
+      todo.DueDate.Format("2006-01-02"),
+      string(todo.Priority),
+      completed,
+      labels,
+      todo.CreatedAt.Format("2006-01-02"),
+      todo.UpdatedAt.Format("2006-01-02"),
+    })
+
+  table.Render()
+
+}
+
 func (d *Display) ShowFiles(files []os.FileInfo, storageDir string) {
   if len(files) == 0 {
     fmt.Println("No todos files found.")

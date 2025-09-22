@@ -19,6 +19,14 @@ type MenuController struct {
   todoService *service.TodoService
 }
 
+func NewMenuController() *MenuController {
+  return &MenuController{
+    input: ui.NewInputReader(),
+    display: ui.NewDisplay(),
+    config: config.Default(),
+  }
+}
+
 func (mc *MenuController) Start() {
   fmt.Println("\nWelcome to Go TODO app")
 

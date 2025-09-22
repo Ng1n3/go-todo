@@ -141,6 +141,10 @@ func (ts *TodoService) DeleteTodo(id string) error {
   return ts.storage.Delete(id)
 }
 
+func (ts *TodoService) GetTodo (id string) (types.Todo, error) {
+  return ts.storage.Get(id)
+}
+
 func (ts *TodoService) ListTodos() []types.Todo {
   return ts.storage.List()
 }
