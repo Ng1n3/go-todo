@@ -269,7 +269,7 @@ func ListTodo() {
 
 func UpdateTodo() {
 
-	todos := ts.List()
+	// todos := ts.List()
 	reader := bufio.NewReader(os.Stdin)
 
 	// show the list of todos with their IDs
@@ -277,25 +277,27 @@ func UpdateTodo() {
 
 	// As the user for the ID of the todo to update
 	fmt.Printf("\n Enter the Todo ID you would like to update from.\n")
-	userId, err := reader.ReadString('\n')
+	userID, err := reader.ReadString('\n')
 	if err != nil {
 		fmt.Printf("\nthere was an error reading userId for updating: %v\n", err)
 		return
 	}
 
-	userId = strings.TrimSpace(userId)
+	userID = strings.TrimSpace(userID)
 
 	// Find the todo with the given id
-	var selectedTodo *types.Todo
+	//var selectedTodo *types.Todo
 
-	for _, todo := range todos {
-		if todo.ID == userId {
-			selectedTodo = &todo
-		}
-	}
+	//for _, todo := range todos {
+	//if todo.ID == userId {
+	//selectedTodo = &todo
+	//}
+	//}
 
-	if selectedTodo == nil {
-		fmt.Printf("Todo with id '%s' not found", userId)
+	todo, ok := ts.Get(userID)
+
+	if !ok {
+		fmt.Printf("Todo with id '%s' not found", userID)
 		return
 	}
 
@@ -314,7 +316,7 @@ func UpdateTodo() {
 			fmt.Printf("\nthere was an error reading your title for the update: %v\n", err)
 			return
 		}
-		selectedTodo.Task = newTitle
+		todo.Task = newTitle
 	case "2":
 		fmt.Printf("\nEnter a new due Date: \n")
 		dueDateStr, err := reader.ReadString('\n')
@@ -330,7 +332,7 @@ func UpdateTodo() {
 			return
 		}
 
-		selectedTodo.DueDate = dueDate
+		todo.DueDate = dueDate
 
 	case "3":
 		fmt.Printf("\nEnter the new priority: \n")
@@ -342,7 +344,7 @@ func UpdateTodo() {
 		priority = strings.TrimSpace(priority)
 		priority = strings.ToUpper(priority)
 
-		selectedTodo.Priority = toPriority(priority)
+		todo.Priority = toPriority(priority)
 	case "4":
 		fmt.Printf("\nEnter new lables: \n")
 		labelsInput, err := reader.ReadString('\n')
@@ -353,7 +355,7 @@ func UpdateTodo() {
 
 		labelsInput = strings.TrimSpace(labelsInput)
 		labels := strings.Split(labelsInput, ",")
-		selectedTodo.Labels = labels
+		todo.Labels = labels
 	case "5":
 		fmt.Printf("\nEnter a completed status: \n")
 		completedStr, err := reader.ReadString('\n')
@@ -368,15 +370,15 @@ func UpdateTodo() {
 			fmt.Printf("\nthere was an error converting string to boolean: %v\n", err)
 			return
 		}
-		selectedTodo.Completed = completed
+		todo.Completed = completed
 	default:
 		fmt.Printf("\nSorry this command is invalid\n")
 		return
 	}
 
-	selectedTodo.UpdatedAt = time.Now()
+	todo.UpdatedAt = time.Now()
 
-	ts.Save(*selectedTodo)
+	ts.Save(todo)
 	ts.Persist()
 	ts.SaveSummary("save_todos.json")
 
