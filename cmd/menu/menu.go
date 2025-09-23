@@ -145,11 +145,6 @@ func (mc *MenuController) listTodoFiles() {
 
 func (mc *MenuController) deleteTodoFile() {
 	mc.listTodoFiles()
-	todoID, err := mc.input.ReadString("Enter the id of the file you want to delete: ")
-	if err != nil {
-		mc.display.ShowError(err)
-		return
-	}
 
 	filename, err := mc.input.ReadString("Enter the name of the file you want to delete: ")
 	if err != nil {
@@ -176,16 +171,11 @@ func (mc *MenuController) deleteTodoFile() {
 	}
 
 	if confirm == "y" || confirm == "yes" {
-		if err := mc.todoService.DeleteTodo(todoID); err != nil {
-			mc.display.ShowError(err)
+		if err := os.Remove(fullPath); err != nil {
+			mc.display.ShowError(fmt.Errorf("failed to delete file %s: %w", filename, err))
 			return
 		}
-
-		if err := mc.todoService.Save(); err != nil {
-			mc.display.ShowError(fmt.Errorf("failed to save changes: %w", err))
-			return
-		}
-		mc.display.ShowSuccess("Todo deleted successfully!")
+		mc.display.ShowSuccess("Todo file deleted Successfully")
 	} else {
 		mc.display.ShowInfo("Deletion cancelled")
 	}
