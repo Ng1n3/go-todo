@@ -50,7 +50,7 @@ This structure is supported by several utility packages for handling `config`, `
 1.  **Clone the repository:**
 
     ```sh
-    git clone https://github.com/your-username/go-todo.git
+    git clone https://github.com/Ng1n3/go-todo.git
     cd go-todo
     ```
 
