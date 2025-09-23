@@ -1,5 +1,5 @@
 // Package service provides the business logic layer for the go-todo application.
-// 
+//
 // It acts as an intermediary between the CLI/UI layer and the storage layer.
 // The TodoService type exposes high-level operations for managing todos such as
 // creating, updating, deleting, and listing tasks. It validates input using the
@@ -21,142 +21,141 @@ import (
 )
 
 type TodoService struct {
-  storage *store.TodoStorage
-  config *config.Config
+	storage *store.TodoStorage
+	config  *config.Config
 }
 
 func NewTodoService(filename string, cfg *config.Config) (*TodoService, error) {
-  if cfg == nil {
-    cfg = config.Default()
-  }
+	if cfg == nil {
+		cfg = config.Default()
+	}
 
-  storage, err := store.NewTodoStorage(filename, cfg)
-  if err != nil {
-    return nil, fmt.Errorf("failed to create create todo storage: %w", err)
-  }
+	storage, err := store.NewTodoStorage(filename, cfg)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create create todo storage: %w", err)
+	}
 
-  return &TodoService{
-    storage: storage,
-    config: cfg,
-  }, nil
+	return &TodoService{
+		storage: storage,
+		config:  cfg,
+	}, nil
 }
 
-func (ts *TodoService) CreateTodo (task, dueDate, completed  string, priority types.Priority, labels string) (*types.Todo, error) {
+func (ts *TodoService) CreateTodo(task, dueDate, completed string, priority types.Priority, labels string) (*types.Todo, error) {
 
-  validTask, err := utils.ValidateTask(task)
-  if err != nil {
-    return nil, err
-  }
+	validTask, err := utils.ValidateTask(task)
+	if err != nil {
+		return nil, err
+	}
 
-  validDate, err := utils.ValidateDate(dueDate)
-  if err != nil {
-    return nil, err
-  }
+	validDate, err := utils.ValidateDate(dueDate)
+	if err != nil {
+		return nil, err
+	}
 
-  validCompleted, err := utils.ValidateCompleted(completed)
-  if err != nil {
-    return nil, err
-  }
+	validCompleted, err := utils.ValidateCompleted(completed)
+	if err != nil {
+		return nil, err
+	}
 
-  if priority == "" {
-    priority = types.Low
-  }
+	if priority == "" {
+		priority = types.Low
+	}
 
-  if err := priority.Validate(); err != nil {
-    return nil, err
-  }
+	if err := priority.Validate(); err != nil {
+		return nil, err
+	}
 
-  validLabels := utils.ValidateLabels(labels)
+	validLabels := utils.ValidateLabels(labels)
 
-  todo := &types.Todo{
-    ID: utils.GenerateID(6),
-    Task: validTask,
-    Labels: validLabels,
-    Completed: validCompleted,
-    DueDate: validDate,
-    Priority: priority,
-    CreatedAt: time.Now(),
-    UpdatedAt: time.Now(),
-  }
+	todo := &types.Todo{
+		ID:        utils.GenerateID(6),
+		Task:      validTask,
+		Labels:    validLabels,
+		Completed: validCompleted,
+		DueDate:   validDate,
+		Priority:  priority,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
 
-  if err := ts.storage.Save(todo); err != nil {
-    return nil, fmt.Errorf("failed to save todo: %w",err)
-  }
+	if err := ts.storage.Save(todo); err != nil {
+		return nil, fmt.Errorf("failed to save todo: %w", err)
+	}
 
-  return todo, nil
-  
+	return todo, nil
+
 }
 
-func (ts *TodoService) UpdateTodo (id string, updates map[string]any) error {
-  todo, err := ts.storage.Get(id)
-  if err != nil {
-    return err
-  }
+func (ts *TodoService) UpdateTodo(id string, updates map[string]any) error {
+	todo, err := ts.storage.Get(id)
+	if err != nil {
+		return err
+	}
 
-  for field, value := range updates {
-    switch field {
-      case "task":
-        if task, ok := value.(string); ok {
-          validTask, err := utils.ValidateTask(task)
-          if err != nil {
-            return err
-          }
-          todo.Task = validTask
-        }
-      case "due_date":
-        if dateStr, ok := value.(string); ok {
-          validDate, err := utils.ValidateDate(dateStr)
-          if err != nil {
-            return err
-          }
-          todo.DueDate = validDate
-        }
-      case "priority":
-        if priority, ok := value.(types.Priority); ok {
-          if err := priority.Validate(); err != nil {
-            return err
-          }
-          todo.Priority = priority
-        }
+	for field, value := range updates {
+		switch field {
+		case "task":
+			if task, ok := value.(string); ok {
+				validTask, err := utils.ValidateTask(task)
+				if err != nil {
+					return err
+				}
+				todo.Task = validTask
+			}
+		case "due_date":
+			if dateStr, ok := value.(string); ok {
+				validDate, err := utils.ValidateDate(dateStr)
+				if err != nil {
+					return err
+				}
+				todo.DueDate = validDate
+			}
+		case "priority":
+			if priority, ok := value.(types.Priority); ok {
+				if err := priority.Validate(); err != nil {
+					return err
+				}
+				todo.Priority = priority
+			}
 
-      case "labels":
-        if labels, ok := value.(string); ok {
-          validatedLabels := utils.ValidateLabels(labels)
-          todo.Labels = validatedLabels
-        }
-      case "completed":
-        if completed, ok := value.(string); ok {
-          validatedCompleted, err := utils.ValidateCompleted(completed)
-          if err != nil {
-            return err
-          }
-          todo.Completed = validatedCompleted
-        }
-    }
-  }
-  return ts.storage.Save(&todo)
+		case "labels":
+			if labels, ok := value.(string); ok {
+				validatedLabels := utils.ValidateLabels(labels)
+				todo.Labels = validatedLabels
+			}
+		case "completed":
+			if completed, ok := value.(string); ok {
+				validatedCompleted, err := utils.ValidateCompleted(completed)
+				if err != nil {
+					return err
+				}
+				todo.Completed = validatedCompleted
+			}
+		}
+	}
+	return ts.storage.Save(&todo)
 }
 
 func (ts *TodoService) DeleteTodo(id string) error {
-  return ts.storage.Delete(id)
+	return ts.storage.Delete(id)
 }
 
-func (ts *TodoService) GetTodo (id string) (types.Todo, error) {
-  return ts.storage.Get(id)
+func (ts *TodoService) GetTodo(id string) (types.Todo, error) {
+	return ts.storage.Get(id)
 }
 
 func (ts *TodoService) ListTodos() []types.Todo {
-  return ts.storage.List()
+	return ts.storage.List()
 }
 
-
 func (ts *TodoService) Save() error {
-  if err := ts.storage.Persist(); err != nil {
-    return fmt.Errorf("failed to persist todos: %w",err)
-  }
+	if err := ts.storage.Persist(); err != nil {
+		return fmt.Errorf("failed to persist todos: %w", err)
+	}
 
-  if err := ts.storage.SaveSummary(ts.config.SummaryFile); err != nil {
-    return fmt.Errorf("failed to save summary: %w",err)
-  }
-  return nil
+	if err := ts.storage.SaveSummary(ts.config.SummaryFile); err != nil {
+		return fmt.Errorf("failed to save summary: %w", err)
+	}
+	return nil
 }

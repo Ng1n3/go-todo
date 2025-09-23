@@ -9,97 +9,97 @@ import (
 	"github.com/olekukonko/tablewriter"
 )
 
-type Display struct {}
+type Display struct{}
 
 func NewDisplay() *Display {
-  return &Display{}
+	return &Display{}
 }
 
 func (d *Display) ShowTodos(todos []types.Todo) {
-  if len(todos) == 0 {
-    fmt.Println("No todos found.")
-    return
-  }
+	if len(todos) == 0 {
+		fmt.Println("No todos found.")
+		return
+	}
 
-  table := tablewriter.NewWriter(os.Stdout)
-  table.Header([]string{"ID", "Task", "Due Date", "Priority", "Completed", "Labels", "Created", "Updated"})
+	table := tablewriter.NewWriter(os.Stdout)
+	table.Header([]string{"ID", "Task", "Due Date", "Priority", "Completed", "Labels", "Created", "Updated"})
 
-  for _, todo := range todos {
-    labels := strings.Join(todo.Labels, ", ")
-    completed := "No"
-    if todo.Completed {
-      completed = "Yes"
-    }
-    
-    table.Append([]string {
-      todo.ID,
-      todo.Task,
-      todo.DueDate.Format("2006-01-02"),
-      string(todo.Priority),
-      completed,
-      labels,
-      todo.CreatedAt.Format("2006-01-02"),
-      todo.UpdatedAt.Format("2006-01-02"),
-    })
-  }
+	for _, todo := range todos {
+		labels := strings.Join(todo.Labels, ", ")
+		completed := "No"
+		if todo.Completed {
+			completed = "Yes"
+		}
 
-  table.Render()
+		table.Append([]string{
+			todo.ID,
+			todo.Task,
+			todo.DueDate.Format("2006-01-02"),
+			string(todo.Priority),
+			completed,
+			labels,
+			todo.CreatedAt.Format("2006-01-02"),
+			todo.UpdatedAt.Format("2006-01-02"),
+		})
+	}
+
+	table.Render()
 }
 
-func (d *Display) ShowTodo (todo types.Todo) {
-  table := tablewriter.NewWriter(os.Stdout)
-  table.Header([]string{"ID", "Task", "Due Date", "Priority", "Completed", "Labels", "Created", "Updated"})
+func (d *Display) ShowTodo(todo types.Todo) {
+	table := tablewriter.NewWriter(os.Stdout)
+	table.Header([]string{"ID", "Task", "Due Date", "Priority", "Completed", "Labels", "Created", "Updated"})
 
-    labels := strings.Join(todo.Labels, ", ")
-    completed := "No"
-    if todo.Completed {
-      completed = "Yes"
-    }
-    
-    table.Append([]string {
-      todo.ID,
-      todo.Task,
-      todo.DueDate.Format("2006-01-02"),
-      string(todo.Priority),
-      completed,
-      labels,
-      todo.CreatedAt.Format("2006-01-02"),
-      todo.UpdatedAt.Format("2006-01-02"),
-    })
+	labels := strings.Join(todo.Labels, ", ")
+	completed := "No"
+	if todo.Completed {
+		completed = "Yes"
+	}
 
-  table.Render()
+	table.Append([]string{
+		todo.ID,
+		todo.Task,
+		todo.DueDate.Format("2006-01-02"),
+		string(todo.Priority),
+		completed,
+		labels,
+		todo.CreatedAt.Format("2006-01-02"),
+		todo.UpdatedAt.Format("2006-01-02"),
+	})
+
+	table.Render()
 
 }
 
 func (d *Display) ShowFiles(files []os.FileInfo, storageDir string) {
-  if len(files) == 0 {
-    fmt.Println("No todos files found.")
-    return
-  }
-  
-  table := tablewriter.NewWriter(os.Stdout)
-  table.Header([]string{"File Name", "Size (KB)", "Modified"})
+	if len(files) == 0 {
+		fmt.Println("No todos files found.")
+		return
+	}
 
-  for _, file := range files {
-    if !file.IsDir() && strings.HasSuffix(file.Name(), ".json") {
-      table.Append([]string {
-        file.Name(),
-        fmt.Sprintf("%0.2f", float64(file.Size())/1024.0),
-        file.ModTime().Format("2006-01-02 15:04"),
-      })
-    }
-  }
-  table.Render()
+	table := tablewriter.NewWriter(os.Stdout)
+	table.Header([]string{"File Name", "Size (KB)", "Modified"})
+
+	for _, file := range files {
+		if !file.IsDir() && strings.HasSuffix(file.Name(), ".json") {
+			table.Append([]string{
+				file.Name(),
+				fmt.Sprintf("%0.2f", float64(file.Size())/1024.0),
+				file.ModTime().Format("2006-01-02 15:04"),
+			})
+		}
+	}
+	table.Render()
 }
 
 func (d *Display) ShowError(err error) {
-  fmt.Printf("Error: %v\n", err)
+	fmt.Printf("Error: %v\n", err)
 }
 
 func (d *Display) ShowSuccess(message string) {
-  fmt.Printf("✓ %s\n", message)
+	fmt.Printf("✓ %s\n", message)
 }
 
-func (d *Display) ShowInfo (message string) {
-  fmt.Printf("i %s\n",message)
+func (d *Display) ShowInfo(message string) {
+	fmt.Printf("i %s\n", message)
 }

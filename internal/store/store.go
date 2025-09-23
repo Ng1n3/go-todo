@@ -27,67 +27,65 @@ import (
 	"github.com/Ng1n3/go-todo/internal/types"
 )
 
-
-
 type TodoStorage struct {
-	store map[string]types.Todo
-	file  string
-  config *config.Config
+	store  map[string]types.Todo
+	file   string
+	config *config.Config
 }
 
 func NewTodoStorage(file string, cfg *config.Config) (*TodoStorage, error) {
-  if cfg == nil {
-    cfg = config.Default()
-  }
+	if cfg == nil {
+		cfg = config.Default()
+	}
 
 	ts := &TodoStorage{store: make(map[string]types.Todo), file: file, config: cfg}
-  if err := ts.Load(); err != nil {
-    return nil, fmt.Errorf("failed to load todos: %w", err)
-  }
+	if err := ts.Load(); err != nil {
+		return nil, fmt.Errorf("failed to load todos: %w", err)
+	}
 	return ts, nil
 }
 
-func (ts *TodoStorage) Load() error  {
+func (ts *TodoStorage) Load() error {
 	data, err := os.ReadFile(ts.file)
 	if err != nil {
 		if os.IsNotExist(err) {
-      return nil
-    }
-    return fmt.Errorf("failed to read file: %w", err)
+			return nil
+		}
+		return fmt.Errorf("failed to read file: %w", err)
 	}
-	
-  if len(data) == 0 {
-    return nil
-  }
 
-  if err := json.Unmarshal(data, &ts.store); err != nil {
-    return fmt.Errorf("failed to unmarshal todos : %w", err)
-  }
+	if len(data) == 0 {
+		return nil
+	}
 
-  return nil
+	if err := json.Unmarshal(data, &ts.store); err != nil {
+		return fmt.Errorf("failed to unmarshal todos : %w", err)
+	}
+
+	return nil
 
 }
 
-func (ts *TodoStorage) Persist()error {
+func (ts *TodoStorage) Persist() error {
 	data, err := json.MarshalIndent(ts.store, "", " ")
 	if err != nil {
 		return fmt.Errorf("failed to marshal todos: %w", err)
 	}
 
-  if err := os.WriteFile(ts.file, data, ts.config.FileMode); err != nil {
+	if err := os.WriteFile(ts.file, data, ts.config.FileMode); err != nil {
 		return fmt.Errorf("failed to write file: %w", err)
 	}
-  return nil
+	return nil
 }
 
 func (ts *TodoStorage) Save(todo *types.Todo) error {
-  if err := todo.Validate(); err != nil {
-    return fmt.Errorf("invalid todo: %w",err)
-  }
+	if err := todo.Validate(); err != nil {
+		return fmt.Errorf("invalid todo: %w", err)
+	}
 
-  todo.UpdatedAt = time.Now()
+	todo.UpdatedAt = time.Now()
 	ts.store[todo.ID] = *todo
-  return nil
+	return nil
 }
 
 func (ts *TodoStorage) SaveSummary(summaryFile string) error {
@@ -105,21 +103,21 @@ func (ts *TodoStorage) SaveSummary(summaryFile string) error {
 		return fmt.Errorf("failed to marashal summary: %w", err)
 	}
 
-  if err := os.WriteFile(summaryFile, data, ts.config.FileMode); err != nil {
+	if err := os.WriteFile(summaryFile, data, ts.config.FileMode); err != nil {
 		return fmt.Errorf("failed to write summary file: %w", err)
 	}
-  
-return nil
+
+	return nil
 
 }
 
 func (ts *TodoStorage) Get(id string) (types.Todo, error) {
-  todo, exists := ts.store[id]
-  if !exists {
-    return types.Todo{}, errors.ErrTodoNotFound
-  }
+	todo, exists := ts.store[id]
+	if !exists {
+		return types.Todo{}, errors.ErrTodoNotFound
+	}
 
-  return todo, nil
+	return todo, nil
 }
 
 func (ts *TodoStorage) Delete(id string) error {
@@ -140,5 +138,5 @@ func (ts *TodoStorage) List() []types.Todo {
 }
 
 func (ts *TodoStorage) Count() int {
-  return len(ts.store)
+	return len(ts.store)
 }

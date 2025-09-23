@@ -1,7 +1,11 @@
+// Package types defines the core data structures and validation logic
+// used in the todo application, including Todo items, priorities,
+// and helper methods for normalization and validation.
 package types
 
 import (
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -25,7 +29,7 @@ type Todo struct {
 }
 
 func (p Priority) Validate() error {
-	switch p {
+	switch p.Normalize() {
 	case High, Medium, Low:
 		return nil
 	default:
@@ -35,11 +39,11 @@ func (p Priority) Validate() error {
 
 func (t *Todo) Validate() error {
 	if len(t.Task) < 2 {
-		return fmt.Errorf("\ntask must be at least 2 characters long\n")
+		return fmt.Errorf("\ntask must be at least 2 characters long")
 	}
 
 	if t.ID == "" {
-		return fmt.Errorf("\ntodo ID cannot be empty\n")
+		return fmt.Errorf("\ntodo ID cannot be empty")
 	}
 
 	if err := t.Priority.Validate(); err != nil {
@@ -47,4 +51,8 @@ func (t *Todo) Validate() error {
 	}
 
 	return nil
+}
+
+func (p Priority) Normalize() Priority {
+	return Priority(strings.ToUpper(string(p)))
 }
